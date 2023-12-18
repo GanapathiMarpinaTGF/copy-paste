@@ -1,36 +1,475 @@
 <div class="container text-center">
-
     <div class="row m-3">
-
         <div class="col">
             &nbsp;
         </div>
-
         <div class="col-3">
             <div class="border p-3 bg-primary bg-gradient" id="paste">
                 Paste text from Excel in here
             </div>
         </div>
-
         <div class="col">
             &nbsp;
         </div>
-
     </div>
-
 </div>
 
 <div id="input" class="container text-center">
-    <textarea [(ngModel)]="pasteData" cols="50" rows="10" style="width: 100%;" (change)="readCopiedTextandPopulate()">
+    <textarea [(ngModel)]="pasteData" cols="50" rows="10" style="width: 100%;" (change)="createControls()">
     </textarea>
 </div>
 
-<div class="container">
+<!-- <div class="container">
     <div [formGroup]="form">
-        <div class="row" *ngFor="let rowo of inputRows">
+        <div class="row" *ngFor="let control of form.controls">
             <div class="col m-3" *ngFor="let colm of rowo.inputCols">
-                <input type="text" [formControlName]="colm.formControlName">
+                <input type="text" [formControlName]="control">
             </div>
         </div>
     </div>
+</div> -->
+
+<div class="container">
+    <form [formGroup]="form">
+        <div class="row m-3" *ngFor="let control of inputFieldsArray.controls">
+            <div class="col-3">
+                <input [formControl]="control">
+            </div>
+        </div>
+    </form>
 </div>
+
+
+<div class="container">
+
+    <div class="row">
+      <div class="col-3">
+        <div class="mb-3">
+          <label for="pulseCheckReportingPeriodSelection" class="form-label fw-bold text-black-50">Select a Pulse Check Reporting Period</label>
+          <select class="form-select" id="pulseCheckReportingPeriodSelection">
+            <option value="1" selected>01-Oct-2023 - 31-Dec-2023</option>
+            <option value="2">01-Jul-2023 - 30-Sep-2023</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col">
+
+        <!--<ul class="list-group list-group-flush">-->
+          <ul class="list-group">
+
+            <!-- 1 -->
+            <li class="list-group-item" style="background: none;">
+
+              <div class="container">
+
+                <div class="row mt-3">
+                  <div class="col-3 fw-bold text-black-50">Intervention</div>
+                  <div class="col-3 fw-bold text-black-50">Indicator</div>
+                  <div class="col-2 fw-bold text-black-50">Scope of targets</div>
+                  <div class="col-2 fw-bold text-black-50">Cumulation type</div>
+                  <div class="col-2 fw-bold text-black-50">Country</div>
+                </div>
+
+                <div class="row">
+                  <div class="col-3 pt-1 fw-bold">Infection Prevention and Control, and Protection of the Health Workforce</div>
+                  <div class="col-3 pt-1 fw-bold">RSSH/PP RCS-3 Number of PSA plants installed with Global Fund investments and functional</div>
+                  <div class="col-2 pt-1 fw-bold">Geographic Subnational, less than 100% of national program target</div>
+                  <div class="col-2 pt-1 fw-bold">Non cumulative - special</div>
+                  <div class="col-2 pt-1 fw-bold">India</div>
+                </div>
+
+                <div class="row mt-3">
+
+                  <div class="col-xl-8 col-12 mb-3">
+
+                    <div class="card">
+
+                      <div class="card-header fw-bold text-black-50">Baseline</div>
+
+                      <div class="card-body">
+
+                        <div class="container">
+
+                          <div class="row">
+                            <div class="col-3 fw-bold text-black-50 border-bottom">Year</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Numerator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Denominator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Percentage</div>
+                            <div class="col-3 fw-bold text-black-50 border-start border-bottom">Source</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">2020</div>
+                            <div class="col-2 pt-1 border-start">0.8</div>
+                            <div class="col-2 pt-1 border-start">2</div>
+                            <div class="col-2 pt-1 border-start">40%</div>
+                            <div class="col-3 pt-1 border-start">NAVISION Dec 2019 report</div>
+                          </div>
+
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div class="card mt-3">
+
+                      <div class="card-header fw-bold text-black-50">Target & Results</div>
+
+                      <div class="card-body">
+
+                        <div class="container">
+
+                          <div class="row">
+                            <div class="col-3 fw-bold text-black-50 border-bottom">Target Period</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Numerator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Denominator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Percentage</div>
+                            <div class="col-3 fw-bold text-black-50 border-start border-bottom">TBD</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">1-Jul-23 to 31-Dec-23</div>
+                            <div class="col-2 pt-1 border-start">0.6</div>
+                            <div class="col-2 pt-1 border-start">2</div>
+                            <div class="col-2 pt-1 border-start">30%</div>
+                            <div class="col-3 pt-1 border-start"><input type="checkbox" disabled></div>
+                          </div>
+
+                          <div class="row mt-3">
+                            <div class="col-3 fw-bold text-black-50 border-bottom">Results Periods</div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-3 fw-bold text-black-50 border-start border-bottom">Progress Against Targets</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">1-Oct-23 to 31-Dec-23</div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-3 pt-1 border-start">50%</div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <div class="col-xl-4 col-12 mb-3">
+                    <div class="form-floating">
+                      <textarea class="form-control" id="floatingTextarea" style="min-height: 150px; height: 100%;"></textarea>
+                      <label for="floatingTextarea">Comments</label>
+                    </div>
+                  </div>
+
+                </div>
+
+
+
+
+              </div>
+
+            </li>
+
+            <!-- 2 -->
+            <li class="list-group-item" style="background: none;">
+
+              <div class="container">
+
+                <div class="row mt-3">
+                  <div class="col-3 fw-bold text-black-50">Intervention</div>
+                  <div class="col-3 fw-bold text-black-50">Indicator</div>
+                  <div class="col-2 fw-bold text-black-50">Scope of targets</div>
+                  <div class="col-2 fw-bold text-black-50">Cumulation type</div>
+                  <div class="col-2 fw-bold text-black-50">Country</div>
+                </div>
+
+                <div class="row">
+                  <div class="col-3 pt-1 fw-bold">Infection Prevention and Control, and Protection of the Health Workforce</div>
+                  <div class="col-3 pt-1 fw-bold">RSSH/PP RCS-3 Number of PSA plants installed with Global Fund investments and functional</div>
+                  <div class="col-2 pt-1 fw-bold">Geographic Subnational, less than 100% of national program target</div>
+                  <div class="col-2 pt-1 fw-bold">Non cumulative - special</div>
+                  <div class="col-2 pt-1 fw-bold">India</div>
+                </div>
+
+                <div class="row mt-3">
+
+                  <div class="col-xl-8 col-12 mb-3">
+
+                    <div class="card">
+
+                      <div class="card-header fw-bold text-black-50">Baseline</div>
+
+                      <div class="card-body">
+
+                        <div class="container">
+
+                          <div class="row">
+                            <div class="col-3 fw-bold text-black-50 border-bottom">Year</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Numerator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Denominator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Percentage</div>
+                            <div class="col-3 fw-bold text-black-50 border-start border-bottom">Source</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">2020</div>
+                            <div class="col-2 pt-1 border-start">0.8</div>
+                            <div class="col-2 pt-1 border-start">2</div>
+                            <div class="col-2 pt-1 border-start">40%</div>
+                            <div class="col-3 pt-1 border-start">NAVISION Dec 2019 report</div>
+                          </div>
+
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div class="card mt-3">
+
+                      <div class="card-header fw-bold text-black-50">Target & Results</div>
+
+                      <div class="card-body">
+
+                        <div class="container">
+
+                          <div class="row">
+                            <div class="col-3 fw-bold text-black-50 border-bottom">Target Period</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Numerator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Denominator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Percentage</div>
+                            <div class="col-3 fw-bold text-black-50 border-start border-bottom">TBD</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">1-Jul-23 to 31-Dec-23</div>
+                            <div class="col-2 pt-1 border-start">0.6</div>
+                            <div class="col-2 pt-1 border-start">2</div>
+                            <div class="col-2 pt-1 border-start">30%</div>
+                            <div class="col-3 pt-1 border-start"><input type="checkbox" disabled></div>
+                          </div>
+
+                          <div class="row mt-3">
+                            <div class="col-3 fw-bold text-black-50 border-bottom">Results Periods</div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-3 fw-bold text-black-50 border-start border-bottom">Progress Against Targets</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">1-Oct-23 to 31-Oct-23</div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-3 pt-1 border-start">45%</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">1-Nov-23 to 30-Nov-23</div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-3 pt-1 border-start">50%</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">1-Dec-23 to 31-Dec-23</div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-3 pt-1 border-start">55%</div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <div class="col-xl-4 col-12 mb-3">
+                    <div class="form-floating">
+                      <textarea class="form-control" id="floatingTextarea" style="height: 100%;"></textarea>
+                      <label for="floatingTextarea">Comments</label>
+                    </div>
+                  </div>
+
+                </div>
+
+
+
+
+              </div>
+
+            </li>
+
+            <!-- 3 -->
+            <li class="list-group-item" style="background: none;">
+
+              <div class="container">
+
+                <div class="row mt-3">
+                  <div class="col-3 fw-bold text-black-50">Intervention</div>
+                  <div class="col-3 fw-bold text-black-50">Indicator</div>
+                  <div class="col-2 fw-bold text-black-50">Scope of targets</div>
+                  <div class="col-2 fw-bold text-black-50">Cumulation type</div>
+                  <div class="col-2 fw-bold text-black-50">Country</div>
+                </div>
+
+                <div class="row">
+                  <div class="col-3 pt-1 fw-bold">Infection Prevention and Control, and Protection of the Health Workforce</div>
+                  <div class="col-3 pt-1 fw-bold">RSSH/PP RCS-3 Number of PSA plants installed with Global Fund investments and functional</div>
+                  <div class="col-2 pt-1 fw-bold">Geographic Subnational, less than 100% of national program target</div>
+                  <div class="col-2 pt-1 fw-bold">Non cumulative - special</div>
+                  <div class="col-2 pt-1 fw-bold">India</div>
+                </div>
+
+                <div class="row mt-3">
+
+                  <div class="col-xl-8 col-12 mb-3">
+
+                    <div class="card">
+
+                      <div class="card-header fw-bold text-black-50">Baseline</div>
+
+                      <div class="card-body">
+
+                        <div class="container">
+
+                          <div class="row">
+                            <div class="col-3 fw-bold text-black-50 border-bottom">Year</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Numerator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Denominator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Percentage</div>
+                            <div class="col-3 fw-bold text-black-50 border-start border-bottom">Source</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">2020</div>
+                            <div class="col-2 pt-1 border-start">0.8</div>
+                            <div class="col-2 pt-1 border-start">2</div>
+                            <div class="col-2 pt-1 border-start">40%</div>
+                            <div class="col-3 pt-1 border-start">NAVISION Dec 2019 report</div>
+                          </div>
+
+                        </div>
+
+                      </div>
+                    </div>
+
+                    <div class="card mt-3">
+
+                      <div class="card-header fw-bold text-black-50">Target & Results</div>
+
+                      <div class="card-body">
+
+                        <div class="container">
+
+                          <div class="row">
+                            <div class="col-3 fw-bold text-black-50 border-bottom">Target Period</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Numerator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Denominator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Percentage</div>
+                            <div class="col-3 fw-bold text-black-50 border-start border-bottom">TBD</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">1-Apr-23 to 30-Sep-23</div>
+                            <div class="col-2 pt-1 border-start">0.4</div>
+                            <div class="col-2 pt-1 border-start">2</div>
+                            <div class="col-2 pt-1 border-start">20%</div>
+                            <div class="col-3 pt-1 border-start"><input type="checkbox" disabled></div>
+                          </div>
+
+                          <div class="row mt-3">
+                            <div class="col-3 fw-bold text-black-50 border-bottom">Results Periods</div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-3 fw-bold text-black-50 border-start border-bottom">Progress Against Targets</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">1-Oct-23 to 31-Dec-23</div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-3 pt-1 border-start">40%</div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="card mt-3">
+
+                      <div class="card-header fw-bold text-black-50">Target & Results</div>
+
+                      <div class="card-body">
+
+                        <div class="container">
+
+                          <div class="row">
+                            <div class="col-3 fw-bold text-black-50 border-bottom">Target Period</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Numerator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Denominator</div>
+                            <div class="col-2 fw-bold text-black-50 border-start border-bottom">Percentage</div>
+                            <div class="col-3 fw-bold text-black-50 border-start border-bottom">TBD</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">1-Oct-23 to 31-Dec-23</div>
+                            <div class="col-2 pt-1 border-start">0.6</div>
+                            <div class="col-2 pt-1 border-start">2</div>
+                            <div class="col-2 pt-1 border-start">30%</div>
+                            <div class="col-3 pt-1 border-start"><input type="checkbox" disabled></div>
+                          </div>
+
+                          <div class="row mt-3">
+                            <div class="col-3 fw-bold text-black-50 border-bottom">Results Periods</div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-2 fw-bold text-black-50 border-start"></div>
+                            <div class="col-3 fw-bold text-black-50 border-start border-bottom">Progress Against Targets</div>
+                          </div>
+
+                          <div class="row">
+                            <div class="col-3 pt-1">1-Oct-23 to 31-Dec-23</div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-2 pt-1 border-start"><input class="form-control form-control-sm" type="number"></div>
+                            <div class="col-3 pt-1 border-start">50%</div>
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <div class="col-xl-4 col-12 mb-3">
+                    <div class="form-floating">
+                      <textarea class="form-control" id="floatingTextarea" style="height: 100%;"></textarea>
+                      <label for="floatingTextarea">Comments</label>
+                    </div>
+                  </div>
+
+                </div>
+
+
+
+
+              </div>
+
+            </li>
+
+          </ul>
+
+        </div>
+      </div>
+    </div>

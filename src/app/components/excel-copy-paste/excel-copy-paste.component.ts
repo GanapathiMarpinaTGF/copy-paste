@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-excel-copy-paste',
@@ -8,10 +8,13 @@ import { FormGroup } from '@angular/forms';
 })
 export class ExcelCopyPasteComponent {
 
-  form!: FormGroup;
+  form: FormGroup = this.fb.group({});
   pasteData!: string;
   inputRows: any[]=[];
   inputCols:any[] = [];
+  inputFieldsArray = new FormArray([new FormControl('')]);
+  constructor(private readonly fb:FormBuilder) {
+  }
 
 
   readCopiedTextandPopulate() {
@@ -45,7 +48,6 @@ export class ExcelCopyPasteComponent {
         inputElement.setAttribute("type", "text");
         inputElement.setAttribute("id", "i" + "-" + rowIndex + "-" + columnIndex);
         inputElement.value = columns[j];
-
         columnDivElement.appendChild(inputElement);
 
         rowDivElement.appendChild(columnDivElement);
@@ -55,6 +57,19 @@ export class ExcelCopyPasteComponent {
       inputDivElement?.appendChild(rowDivElement)
 
     }
-
+  } 
+  
+  createControls() {
+    let pasteDivText = this.pasteData;
+    let rows = pasteDivText.split(/\r?\n/);
+    for (let i = 0; i < rows.length; i++) {
+      let columns = rows[i].split(/\t/);
+      for (let j = 0; j < columns.length; j++) {
+        const control = new FormControl(columns[j]);
+        this.inputFieldsArray.push(control);
+        this.form.addControl('control'+i+j,this.fb.control(columns[j]));
+      }
+    }
+    console.log(this.inputFieldsArray, this.form);
   }
 }

@@ -5,11 +5,15 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ExcelCopyPasteComponent } from './components/excel-copy-paste/excel-copy-paste.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { HeadingsComponent } from './components/headings/headings.component';
+import { KeysPipe } from './components/keys.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
-    ExcelCopyPasteComponent
+    ExcelCopyPasteComponent,
+    HeadingsComponent,
+    KeysPipe
   ],
   imports: [
     BrowserModule,

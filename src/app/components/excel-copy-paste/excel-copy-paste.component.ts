@@ -1,75 +1,196 @@
-import { Component } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { FormArray, FormBuilder, FormControl, FormGroup, FormRecord, Validators } from '@angular/forms';
+import  * as Papa from 'papaparse';
 
 @Component({
   selector: 'app-excel-copy-paste',
   templateUrl: './excel-copy-paste.component.html',
-  styleUrls: ['./excel-copy-paste.component.css']
+  styleUrls: ['./excel-copy-paste.component.css'],
 })
-export class ExcelCopyPasteComponent {
-
-  form: FormGroup = this.fb.group({});
+export class ExcelCopyPasteComponent implements OnInit {
   pasteData!: string;
-  inputRows: any[]=[];
-  inputCols:any[] = [];
-  inputFieldsArray = new FormArray([new FormControl('')]);
-  constructor(private readonly fb:FormBuilder) {
+  tableForm: FormGroup = this.fb.group({});
+  form!: FormGroup;
+  options = [
+    { key: 'costDimension', value: 'Cost Dimension', isRequired: true },
+    { key: 'budget', value: 'Budget', isRequired: false },
+    { key: 'actualExp', value: 'Actual Expenditure', isRequired: false },
+    {
+      key: 'budgetVsActualExp',
+      value: 'Budget Vs Actual Variance',
+      isRequired: false,
+    },
+    { key: 'ignore', value: 'Ignore', isRequired: false },
+  ];
+
+  headings!: {
+    key: string;
+    label: string;
+    value: string;
+    required: boolean;
+    options: { key: string; value: string; isRequired: boolean }[];
+  }[];
+  constructor(private readonly fb: FormBuilder) {}
+  ngOnInit(): void {
+    this.tableForm = this.fb.group({
+      rows: this.fb.array([]),
+    });
   }
 
+  toFormGroup(options: any[]) {
+    const group: any = {};
+    options.forEach((option,index) => {
+      group[option.key] = option.required
+        ? new FormControl(option.value || '', Validators.required)
+        : new FormControl(option.value || '');
+    });
+    return new FormGroup(group);
+  }
 
-  readCopiedTextandPopulate() {
-    let inputDivElement = document.getElementById("input");
-    //let pasteDivText = event.clipboardData? (event.clipboardData).getData("text") : ''
-    //let pasteDivText = (event.clipboardData || window.clipboardData).getData("text/html");
-    let pasteDivText = this.pasteData;
-    console.log("Copied text:\n");
-    console.log(pasteDivText);
+  get rowsContrlos() {
+    // const controls = (this.tableForm?.get('rows') as FormArray).controls
+    // return (this.tableForm?.get('rows') as FormArray).controls as FormControl[];
+    return (<FormArray>this.tableForm.get('rows')).controls;
+  }
 
-    let rows = pasteDivText.split(/\r?\n/);
-
-    for (let i = 0; i < rows.length; i++) {
-
-      let rowIndex = i + 1;
-
-      const rowDivElement = document.createElement("div");
-      rowDivElement.classList.add("row", "m-3");
-      let columns = rows[i].split(/\t/);
-      this.inputCols = [];
-      for (let j = 0; j < columns.length; j++) {
-        
-        let columnIndex = j + 1;
-        this.inputCols.push({formControlName:`${'formCtrl'}${j}`});
-        const columnDivElement = document.createElement("div");
-        columnDivElement.classList.add("col");
-
-        const inputElement = document.createElement("input");
-        inputElement.setAttribute("formControlName","paste"+rowIndex+columnIndex);
-        inputElement.classList.add("form-control");
-        inputElement.setAttribute("type", "text");
-        inputElement.setAttribute("id", "i" + "-" + rowIndex + "-" + columnIndex);
-        inputElement.value = columns[j];
-        columnDivElement.appendChild(inputElement);
-
-        rowDivElement.appendChild(columnDivElement);
-
+  pasteEvent(event: ClipboardEvent) {
+    const htmlText = event.clipboardData?.getData('text/html');
+    //console.log("HTML text===>",htmlText);
+    if(htmlText){
+      const parser = new DOMParser();
+      const parsedText = parser.parseFromString(htmlText,'text/html');
+      const trTags = parsedText.getElementsByTagName('tr');
+      const formRows = this.tableForm.get('rows') as FormArray;
+      formRows.clear();
+      let tabCount = 0;
+      for(let i = 0; i< trTags.length; i++){
+        if(tabCount < trTags[i].cells.length) { 
+          tabCount = trTags[i].cells.length;
+        }
       }
-      this.inputRows.push({inputCols:this.inputCols});
-      inputDivElement?.appendChild(rowDivElement)
-
+      console.log(trTags[0].cells);
+      for(let i = 0; i< trTags.length; i++){
+        const formRow = this.fb.group({});
+        for(let j = 0; j< trTags[i].cells.length||j < tabCount; j++){
+          const childs = trTags[i].cells[j]?.childNodes;
+          if(childs && childs.length > 1) {
+            let nodeValues = '';
+            childs.forEach((child)=>{
+              console.log("Child value==>",child.nodeValue);
+              nodeValues = child.nodeValue? nodeValues.concat(child.nodeValue) : nodeValues.concat('');
+            });
+            formRow.addControl(`col${j}`, this.fb.control(nodeValues));
+          } else 
+          if(childs) {
+            formRow.addControl(`col${j}`, this.fb.control(trTags[i].cells[j].childNodes[0]?.nodeValue?.trim()));
+          } else {
+            formRow.addControl(`col${j}`, this.fb.control(''));
+          }
+        }
+        formRows.push(formRow);
+      }
+      this.createFormRowsData(tabCount);
     }
-  } 
-  
-  createControls() {
-    let pasteDivText = this.pasteData;
-    let rows = pasteDivText.split(/\r?\n/);
-    for (let i = 0; i < rows.length; i++) {
-      let columns = rows[i].split(/\t/);
-      for (let j = 0; j < columns.length; j++) {
-        const control = new FormControl(columns[j]);
-        this.inputFieldsArray.push(control);
-        this.form.addControl('control'+i+j,this.fb.control(columns[j]));
+    
+    // let pasteDivText = event.clipboardData?.getData('text') || '';
+    // const rows = pasteDivText
+    //   .trim()
+    //   .split(/\r?\n/)
+    //   .map((row) => row.split(/\t/));
+    // console.log("pasteDivText==>",pasteDivText, rows);
+    // this.createFormRowsData(rows[0].length);
+  }
+
+  removeRow(rowIndex: number) {
+    const formRows = this.tableForm.get('rows') as FormArray;
+    formRows.removeAt(rowIndex);
+  }
+
+  removeColumn(colIndex: number) {
+    this.form.removeControl(`col${colIndex}`);
+    const rows = this.tableForm.get('rows') as FormArray;
+    console.log("Rows controls==>",rows);
+    if (this.headings.length > 1) {
+      this.headings.splice(colIndex, 1);
+      rows.controls.forEach((row) => {
+        const rowRecord = row as FormGroup;
+        rowRecord.removeControl(`col${colIndex}`);
+      })
+    }
+  }
+
+  //File upload start here
+  onUploadFile(event: Event) {
+    const files = (event.target as HTMLInputElement).files;
+    if (files && files.length > 0) {
+      let file = files.item(0);
+      if (file) {
+        let reader: FileReader = new FileReader();
+        reader.readAsText(file);
+        reader.onload = (e) => {
+          let csv: string = reader.result as string;
+          Papa.parse(csv, {
+            header: false,
+            skipEmptyLines: true,
+            complete: (result, file) => {
+              const resultData = result.data as string[][];
+              this.createFormRowsData(resultData[0].length);
+              const formRows = this.tableForm.get('rows') as FormArray;
+              formRows.clear();
+              resultData.forEach((row) => {
+                const formRow = this.fb.group({});
+                row.forEach((value, index) => {
+                  formRow.addControl(`col${index}`, this.fb.control(value));
+                });
+                formRows.push(formRow);
+              });
+            },
+          });
+        };
       }
     }
-    console.log(this.inputFieldsArray, this.form);
+  }
+
+  createFormRowsData(tabsCount: number) {
+    this.headings = [];
+    const lastOptionIndex = this.options.length - 1;
+    for (let tabIndex = 0; tabIndex < tabsCount; tabIndex++) {
+      if (lastOptionIndex > tabIndex) {
+        const dropdownObject = {
+          key: `col${tabIndex}`,
+          label: this.options[tabIndex].value,
+          value: this.options[tabIndex].key,
+          required: this.options[tabIndex].isRequired,
+          options: this.options,
+        };
+        this.headings.push(dropdownObject);
+      } else {
+        const dropdownObject = {
+          key: `col${tabIndex}`,
+          label: this.options[lastOptionIndex].value,
+          value: this.options[lastOptionIndex].key,
+          required: this.options[lastOptionIndex].isRequired,
+          options: this.options,
+        };
+        this.headings.push(dropdownObject);
+      }
+    }
+    this.form = this.toFormGroup(this.headings);
+  }
+
+  onSubmit() {
+    let finalSaveObject = {
+      fields: [],
+      data: []
+    }
+    const columnHeadingsValue = this.form.value;
+    finalSaveObject.fields = Object.values(columnHeadingsValue);
+    const dataValues = this.tableForm.get('rows')?.value;
+    dataValues.forEach((obj: any)=>{
+      let vals = Object.values(obj) as string[];
+      vals = vals.map(val=>val?.replace(/\n/g, ''));
+      finalSaveObject.data.push(vals as never);
+    });
+    console.log("Final save object==>",finalSaveObject);
   }
 }

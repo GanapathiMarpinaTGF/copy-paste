@@ -39,7 +39,7 @@ export class ExcelCopyPasteComponent implements OnInit {
 
   toFormGroup(options: any[]) {
     const group: any = {};
-    options.forEach((option,index) => {
+    options.forEach((option) => {
       group[option.key] = option.required
         ? new FormControl(option.value || '', Validators.required)
         : new FormControl(option.value || '');
@@ -68,7 +68,6 @@ export class ExcelCopyPasteComponent implements OnInit {
           tabCount = trTags[i].cells.length;
         }
       }
-      console.log(trTags[0].cells);
       for(let i = 0; i< trTags.length; i++){
         const formRow = this.fb.group({});
         for(let j = 0; j< trTags[i].cells.length||j < tabCount; j++){
@@ -76,7 +75,6 @@ export class ExcelCopyPasteComponent implements OnInit {
           if(childs && childs.length > 1) {
             let nodeValues = '';
             childs.forEach((child)=>{
-              console.log("Child value==>",child.nodeValue);
               nodeValues = child.nodeValue? nodeValues.concat(child.nodeValue) : nodeValues.concat('');
             });
             formRow.addControl(`col${j}`, this.fb.control(nodeValues));
@@ -91,14 +89,6 @@ export class ExcelCopyPasteComponent implements OnInit {
       }
       this.createFormRowsData(tabCount);
     }
-    
-    // let pasteDivText = event.clipboardData?.getData('text') || '';
-    // const rows = pasteDivText
-    //   .trim()
-    //   .split(/\r?\n/)
-    //   .map((row) => row.split(/\t/));
-    // console.log("pasteDivText==>",pasteDivText, rows);
-    // this.createFormRowsData(rows[0].length);
   }
 
   removeRow(rowIndex: number) {
@@ -106,15 +96,14 @@ export class ExcelCopyPasteComponent implements OnInit {
     formRows.removeAt(rowIndex);
   }
 
-  removeColumn(colIndex: number) {
-    this.form.removeControl(`col${colIndex}`);
+  removeColumn(colIndex: number,controlKey:string) {
+    this.form.removeControl(controlKey);
     const rows = this.tableForm.get('rows') as FormArray;
-    console.log("Rows controls==>",rows);
     if (this.headings.length > 1) {
       this.headings.splice(colIndex, 1);
       rows.controls.forEach((row) => {
         const rowRecord = row as FormGroup;
-        rowRecord.removeControl(`col${colIndex}`);
+        rowRecord.removeControl(controlKey);
       })
     }
   }

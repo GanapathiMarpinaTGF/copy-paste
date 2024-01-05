@@ -17,8 +17,8 @@
 <!-- Starts from here -->
 <div class="container mt-3" *ngIf="tableForm && form">
     <div class="row">
-        <div *ngFor="let heading of headings;let colIndex = index" class="col">
-            <button class="btn btn-outline-danger" type="button" (click)="removeColumn(colIndex)">
+        <div *ngFor="let heading of headings;let colIndex = index" class="col text-center">
+            <button class="btn btn-outline-danger" type="button" (click)="removeColumn(colIndex,heading.key)">
                 <i class="bi bi-trash3"></i>
             </button>
         </div>
@@ -26,7 +26,7 @@
             &nbsp;
         </div>
     </div>
-    <div class="row">
+    <div class="row mt-3">
         <div *ngFor="let heading of headings" class="col">
             <app-headings [heading]="heading" [form]="form"></app-headings>
         </div>

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, FormRecord, Validators } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 import  * as Papa from 'papaparse';
 
 @Component({
@@ -18,9 +19,8 @@ export class ExcelCopyPasteComponent implements OnInit {
     {
       key: 'budgetVsActualExp',
       value: 'Budget Vs Actual Variance',
-      isRequired: false,
+      isRequired: true,
     },
-    { key: 'ignore', value: 'Ignore', isRequired: false },
   ];
 
   headings!: {
@@ -30,7 +30,7 @@ export class ExcelCopyPasteComponent implements OnInit {
     required: boolean;
     options: { key: string; value: string; isRequired: boolean }[];
   }[];
-  constructor(private readonly fb: FormBuilder) {}
+  constructor(private readonly fb: FormBuilder, private readonly toastr: ToastrService) {}
   ngOnInit(): void {
     this.tableForm = this.fb.group({
       rows: this.fb.array([]),
@@ -97,6 +97,11 @@ export class ExcelCopyPasteComponent implements OnInit {
   }
 
   removeColumn(colIndex: number,controlKey:string) {
+    const isMandatoryCol = this.options.find(option=>option.key === this.form.get(controlKey)?.value)
+    if(isMandatoryCol?.isRequired){
+      this.toastr.warning("As this column is requied, should not delete");
+      return;
+    }
     this.form.removeControl(controlKey);
     const rows = this.tableForm.get('rows') as FormArray;
     if (this.headings.length > 1) {
@@ -173,13 +178,32 @@ export class ExcelCopyPasteComponent implements OnInit {
       data: []
     }
     const columnHeadingsValue = this.form.value;
-    finalSaveObject.fields = Object.values(columnHeadingsValue);
-    const dataValues = this.tableForm.get('rows')?.value;
-    dataValues.forEach((obj: any)=>{
-      let vals = Object.values(obj) as string[];
-      vals = vals.map(val=>val?.replace(/\n/g, ''));
-      finalSaveObject.data.push(vals as never);
-    });
-    console.log("Final save object==>",finalSaveObject);
+    const reqColMissing = this.isMandatoryColumnMissing(Object.values(columnHeadingsValue));
+    if(!reqColMissing){
+      finalSaveObject.fields = Object.values(columnHeadingsValue);
+      const dataValues = this.tableForm.get('rows')?.value;
+      dataValues.forEach((obj: any)=>{
+        let vals = Object.values(obj) as string[];
+        vals = vals.map(val=>val?.replace(/\n/g, ''));
+        finalSaveObject.data.push(vals as never);
+      });
+      console.log("Final save object==>",finalSaveObject);
+    }
+  }
+
+  isMandatoryColumnMissing(fields:string[]):boolean {
+    const option = this.options.find(option=> option.isRequired && !fields.includes(option.key));
+    if(option) {
+      this.toastr.error(`${option.key} is missing as it is required`,"Error");
+      return true;
+    }
+    return false;
+  }
+
+  clearAll() {
+    const formRows = this.tableForm.get('rows') as FormArray;
+    formRows.clear();
+    this.headings = [];
+    this.tableForm.clearValidators();
   }
 }

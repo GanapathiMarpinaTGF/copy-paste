@@ -15,7 +15,7 @@
     </div>
 
 <!-- Starts from here -->
-<div class="container mt-3" *ngIf="tableForm && form">
+<div class="container mt-3" *ngIf="tableForm && form && headings.length">
     <div class="row">
         <div *ngFor="let heading of headings;let colIndex = index" class="col text-center">
             <button class="btn btn-outline-danger" type="button" (click)="removeColumn(colIndex,heading.key)">
@@ -23,7 +23,7 @@
             </button>
         </div>
         <div class="col-1">
-            &nbsp;
+            <button class="btn btn-outline-primary" (click)="clearAll()">Clear All</button>
         </div>
     </div>
     <div class="row mt-3">

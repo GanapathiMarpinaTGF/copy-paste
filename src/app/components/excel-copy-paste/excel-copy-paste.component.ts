@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import  * as Papa from 'papaparse';
+import { parse } from 'papaparse';
+import { Modal } from 'bootstrap';
 
 @Component({
   selector: 'app-excel-copy-paste',
@@ -12,6 +13,7 @@ export class ExcelCopyPasteComponent implements OnInit {
   pasteData!: string;
   tableForm: FormGroup = this.fb.group({});
   form!: FormGroup;
+  copyModal!: Modal;
   options = [
     { key: 'costDimension', value: 'Cost Dimension', isRequired: true },
     { key: 'budget', value: 'Budget', isRequired: false },
@@ -35,6 +37,28 @@ export class ExcelCopyPasteComponent implements OnInit {
     this.tableForm = this.fb.group({
       rows: this.fb.array([]),
     });
+  }
+
+  openCopyPasteModal() {
+    const copyModal: Element | null = document.getElementById(
+      'copyPasteModal',
+    );
+
+    if (copyModal) {
+      if (!this.copyModal) {
+        this.copyModal = new Modal(copyModal, {
+          backdrop: 'static',
+          keyboard: false,
+        });
+      }
+      this.copyModal.show();
+    }
+  }
+
+  closeModal() {
+    if(this.copyModal) {
+      this.copyModal.hide();
+    }
   }
 
   toFormGroup(options: any[]) {
@@ -123,7 +147,7 @@ export class ExcelCopyPasteComponent implements OnInit {
         reader.readAsText(file);
         reader.onload = (e) => {
           let csv: string = reader.result as string;
-          Papa.parse(csv, {
+          parse(csv, {
             header: false,
             skipEmptyLines: true,
             complete: (result, file) => {
@@ -187,6 +211,10 @@ export class ExcelCopyPasteComponent implements OnInit {
         vals = vals.map(val=>val?.replace(/\n/g, ''));
         finalSaveObject.data.push(vals as never);
       });
+      if(!finalSaveObject.data.length){
+        this.toastr.warning("No data found..!");
+        return;
+      }
       console.log("Final save object==>",finalSaveObject);
     }
   }

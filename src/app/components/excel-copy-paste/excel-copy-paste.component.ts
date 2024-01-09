@@ -15,13 +15,35 @@ export class ExcelCopyPasteComponent implements OnInit {
   form!: FormGroup;
   copyModal!: Modal;
   options = [
-    { key: 'costDimension', value: 'Cost Dimension', isRequired: true },
-    { key: 'budget', value: 'Budget', isRequired: false },
-    { key: 'actualExp', value: 'Actual Expenditure', isRequired: false },
     {
-      key: 'budgetVsActualExp',
-      value: 'Budget Vs Actual Variance',
-      isRequired: true,
+      key: 'costingDimension',
+      value: 'Costing Dimension',
+      isRequired: true
+    },
+    {
+      key: 'budget',
+      value: 'Budget',
+      isRequired: false
+    },
+    {
+      key: 'actualExpenditure',
+      value: 'Actual Expenditure',
+      isRequired: true
+    },
+    {
+      key: 'budgetVsActualVariance',
+      value: 'Budget vs Actual Variance',
+      isRequired: false,
+    },
+    {
+      key: 'absorptionRate',
+      value: 'Absorption Rate',
+      isRequired: false,
+    },
+    {
+      key: 'comment',
+      value: 'Comment',
+      isRequired: false,
     },
   ];
 
@@ -123,7 +145,7 @@ export class ExcelCopyPasteComponent implements OnInit {
   removeColumn(colIndex: number,controlKey:string) {
     const isMandatoryCol = this.options.find(option=>option.key === this.form.get(controlKey)?.value)
     if(isMandatoryCol?.isRequired){
-      this.toastr.warning("As this column is requied, should not delete");
+      this.toastr.warning("Unable to delete: this column is required.");
       return;
     }
     this.form.removeControl(controlKey);
@@ -212,7 +234,7 @@ export class ExcelCopyPasteComponent implements OnInit {
         finalSaveObject.data.push(vals as never);
       });
       if(!finalSaveObject.data.length){
-        this.toastr.warning("No data found..!");
+        this.toastr.warning("Unable to submit: there is no data.");
         return;
       }
       console.log("Final save object==>",finalSaveObject);
@@ -222,7 +244,7 @@ export class ExcelCopyPasteComponent implements OnInit {
   isMandatoryColumnMissing(fields:string[]):boolean {
     const option = this.options.find(option=> option.isRequired && !fields.includes(option.key));
     if(option) {
-      this.toastr.error(`${option.key} is missing as it is required`,"Error");
+      this.toastr.error(`Unable to submit: a required column (${option.key}) is missing.`,"Error");
       return true;
     }
     return false;

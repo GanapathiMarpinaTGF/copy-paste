@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { parse } from 'papaparse';
 import { Modal } from 'bootstrap';
+import { Option } from '../headings/headings.component';
 
 @Component({
   selector: 'app-excel-copy-paste',
@@ -10,11 +11,14 @@ import { Modal } from 'bootstrap';
   styleUrls: ['./excel-copy-paste.component.css'],
 })
 export class ExcelCopyPasteComponent implements OnInit {
+  @ViewChild('inputFile')
+  inputFile!: ElementRef;
   pasteData!: string;
   tableForm: FormGroup = this.fb.group({});
   form!: FormGroup;
+  copyPasteModal!: Modal;
   copyModal!: Modal;
-  options = [
+  options:Option[] = [
     {
       key: 'costingDimension',
       value: 'Costing Dimension',
@@ -23,12 +27,12 @@ export class ExcelCopyPasteComponent implements OnInit {
     {
       key: 'budget',
       value: 'Budget',
-      isRequired: false
+      isRequired: false,
     },
     {
       key: 'actualExpenditure',
       value: 'Actual Expenditure',
-      isRequired: true
+      isRequired: true,
     },
     {
       key: 'budgetVsActualVariance',
@@ -54,6 +58,7 @@ export class ExcelCopyPasteComponent implements OnInit {
     required: boolean;
     options: { key: string; value: string; isRequired: boolean }[];
   }[];
+  clipboardString?: string;
   constructor(private readonly fb: FormBuilder, private readonly toastr: ToastrService) {}
   ngOnInit(): void {
     this.tableForm = this.fb.group({
@@ -62,8 +67,24 @@ export class ExcelCopyPasteComponent implements OnInit {
   }
 
   openCopyPasteModal() {
-    const copyModal: Element | null = document.getElementById(
+    const copyPasteModal: Element | null = document.getElementById(
       'copyPasteModal',
+    );
+
+    if (copyPasteModal) {
+      if (!this.copyPasteModal) {
+        this.copyPasteModal = new Modal(copyPasteModal, {
+          backdrop: 'static',
+          keyboard: false,
+        });
+      }
+      this.copyPasteModal.show();
+    }
+  }
+
+  openCopyModal() {
+    const copyModal: Element | null = document.getElementById(
+      'copyModal',
     );
 
     if (copyModal) {
@@ -78,8 +99,8 @@ export class ExcelCopyPasteComponent implements OnInit {
   }
 
   closeModal() {
-    if(this.copyModal) {
-      this.copyModal.hide();
+    if(this.copyPasteModal) {
+      this.copyPasteModal.hide();
     }
   }
 
@@ -143,9 +164,12 @@ export class ExcelCopyPasteComponent implements OnInit {
   }
 
   removeColumn(colIndex: number,controlKey:string) {
-    const isMandatoryCol = this.options.find(option=>option.key === this.form.get(controlKey)?.value)
-    if(isMandatoryCol?.isRequired){
-      this.toastr.warning("Unable to delete: this column is required.");
+    const colToRemove = this.options.find(option=>option.key === this.form.get(controlKey)?.value)
+    if(colToRemove){
+      colToRemove.disabled = false;
+    }
+    if(colToRemove?.isRequired){
+      this.toastr.warning("Unable to delete: this column is required.","Warning");
       return;
     }
     this.form.removeControl(controlKey);
@@ -193,27 +217,15 @@ export class ExcelCopyPasteComponent implements OnInit {
 
   createFormRowsData(tabsCount: number) {
     this.headings = [];
-    const lastOptionIndex = this.options.length - 1;
     for (let tabIndex = 0; tabIndex < tabsCount; tabIndex++) {
-      if (lastOptionIndex > tabIndex) {
         const dropdownObject = {
           key: `col${tabIndex}`,
-          label: this.options[tabIndex].value,
-          value: this.options[tabIndex].key,
-          required: this.options[tabIndex].isRequired,
+          label: '',
+          value: '',
+          required: false,
           options: this.options,
         };
         this.headings.push(dropdownObject);
-      } else {
-        const dropdownObject = {
-          key: `col${tabIndex}`,
-          label: this.options[lastOptionIndex].value,
-          value: this.options[lastOptionIndex].key,
-          required: this.options[lastOptionIndex].isRequired,
-          options: this.options,
-        };
-        this.headings.push(dropdownObject);
-      }
     }
     this.form = this.toFormGroup(this.headings);
   }
@@ -224,27 +236,32 @@ export class ExcelCopyPasteComponent implements OnInit {
       data: []
     }
     const columnHeadingsValue = this.form.value;
+    const dataValues = this.tableForm.get('rows')?.value;
+    if(!dataValues.length){
+      this.toastr.warning("Unable to submit: there is no data.","Warning");
+      return;
+    }
     const reqColMissing = this.isMandatoryColumnMissing(Object.values(columnHeadingsValue));
     if(!reqColMissing){
       finalSaveObject.fields = Object.values(columnHeadingsValue);
-      const dataValues = this.tableForm.get('rows')?.value;
       dataValues.forEach((obj: any)=>{
         let vals = Object.values(obj) as string[];
         vals = vals.map(val=>val?.replace(/\n/g, ''));
         finalSaveObject.data.push(vals as never);
       });
-      if(!finalSaveObject.data.length){
-        this.toastr.warning("Unable to submit: there is no data.");
-        return;
-      }
       console.log("Final save object==>",finalSaveObject);
     }
   }
 
-  isMandatoryColumnMissing(fields:string[]):boolean {
-    const option = this.options.find(option=> option.isRequired && !fields.includes(option.key));
-    if(option) {
-      this.toastr.error(`Unable to submit: a required column (${option.key}) is missing.`,"Error");
+  isMandatoryColumnMissing(headings:string[]):boolean {
+    const emptyHeadings = headings.filter(field=>field === '');
+    if(emptyHeadings.length) {
+      this.toastr.error(`Empty column(s) found, either delete it or select column value.`,"Error");
+      return true;
+    }
+    const requiredColumn = this.options.find(option=> option.isRequired && !headings.includes(option.key));
+    if(requiredColumn) {
+      this.toastr.error(`Unable to submit: a required column (${requiredColumn.value}) is missing.`,"Error");
       return true;
     }
     return false;
@@ -254,6 +271,48 @@ export class ExcelCopyPasteComponent implements OnInit {
     const formRows = this.tableForm.get('rows') as FormArray;
     formRows.clear();
     this.headings = [];
-    this.tableForm.clearValidators();
+    this.form = this.fb.group({});
+    this.options.forEach(option=>option.disabled=false);
+    this.inputFile.nativeElement.value = "";
+  }
+
+  // Copy data to paste into excel starts here
+  copyData() {
+    const dataObject = {
+      "fields": [
+          "costingDimension",
+          "budget",
+          "actualExpenditure"
+      ],
+      "data": [
+          [
+              "Current Liabilities",
+              "1600882",
+              "220207615"
+          ],
+          [
+              "Current Assets",
+              "162978686",
+              "220577.49"
+          ],
+          [
+              "Loans & Advances (Asset)",
+              "2395266.02",
+              "220577.49"
+          ]
+      ]
+    }
+    let copyString = '';
+    dataObject.fields.forEach(field=>copyString = copyString.concat(`${field}\t`));
+    dataObject.data.forEach(row=>{
+      copyString = copyString.concat(`\n`);
+      row.forEach(value=>copyString = copyString.concat(`${value}\t`))
+    });
+    this.clipboardString = copyString;
+    console.log("Final copied string is:\n",copyString);
+    navigator.clipboard.writeText(copyString);
+    this.toastr.success("Copied the text to clipboard","Copy");
+    //TODO: text formatting pending in modal, see in console it is displaying as expected
+    //this.openCopyModal();
   }
 }

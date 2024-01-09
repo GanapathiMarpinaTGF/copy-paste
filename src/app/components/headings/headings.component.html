@@ -1,8 +1,9 @@
 <form [formGroup]="form">
         <div class="col">
-            <select class="form-select" style="font-weight: bold;" [id]="heading.key" [formControlName]="heading.key">
-                <option selected disabled>Select type</option>
-                <option *ngFor="let opt of heading.options" [value]="opt.key">{{opt.value}}</option>
+            <select class="form-select" style="font-weight: bold;" [id]="heading.key" [formControlName]="heading.key" 
+            (change)="changeHeader()">
+                <option [value]="''" disabled>Select type</option>
+                <option *ngFor="let opt of heading.options" [value]="opt.key" [disabled]="opt.disabled">{{opt.value}}</option>
             </select>
         </div>
 </form>

@@ -7,9 +7,19 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./headings.component.scss']
 })
 export class HeadingsComponent {
-
-  @Input() heading!:  Heading<string>;
+  @Input() heading!: Heading<string>;
   @Input() form!: FormGroup;
+
+  changeHeader() {
+    const formValues = Object.values(this.form?.value) as string[];
+    this.heading?.options.forEach((option:any)=>{
+      if(formValues.includes(option.key)){
+        option.disabled = true;
+      } else {
+        option.disabled = false;
+      }
+    })
+  }
 }
 
 export interface Heading<T> {
@@ -17,22 +27,7 @@ export interface Heading<T> {
   key: string;
   label: string;
   required: boolean;
-  options: {key: string, value: string, isRequired: boolean}[];
-
-  // constructor(options: {
-  //     value?: T;
-  //     key?: string;
-  //     label?: string;
-  //     required?: boolean;
-  //     order?: number;
-  //     controlType?: string;
-  //     type?: string;
-  //     options?: {key: string, value: string}[];
-  //   } = {}) {
-  //   this.value = options.value;
-  //   this.key = options.key || '';
-  //   this.label = options.label || '';
-  //   this.required = !!options.required;
-  //   this.options = options.options || [];
-  // }
+  options: Option[];
 }
+
+export interface Option {key: string, value: string, isRequired: boolean, disabled?: boolean}

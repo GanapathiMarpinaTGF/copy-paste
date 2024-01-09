@@ -2,6 +2,11 @@
 
   <!-- Button -->
   <div class="row">
+    <div class="col">
+      <button class="btn btn-primary" (click)="copyData()">
+        Copy data to paste into Excel
+      </button>
+    </div>
     <div class="col text-end">
       <button class="btn btn-primary" (click)="openCopyPasteModal()">
         Copy-paste data from Excel for Total Expenditure
@@ -26,7 +31,7 @@
         <button
         type="button"
         class="btn btn-close"
-        (click)="closeModal()"
+        (click)="closeModal();clearAll()"
         aria-label="Close"
         ></button>
       </div>
@@ -62,6 +67,7 @@
                 Or you can select a CSV file:
               </label>
               <input
+                #inputFile
                 class="form-control"
                 (change)="onUploadFile($event)"
                 type="file"
@@ -147,7 +153,7 @@
         <button
           type="button"
           class="btn btn-secondary"
-          (click)="closeModal()">
+          (click)="closeModal();clearAll()">
           Cancel
         </button>
         <button
@@ -165,5 +171,39 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- Copy Modal -->
+
+<div
+  class="modal fade"
+  id="copyModal"
+  tabindex="-1">
+  <div class="modal-dialog modal-dialog-scrollable modal-xl">
+    <div class="modal-content">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="fileUploadModal">
+          Copy text to paste into excel </h5>
+        <button
+        type="button"
+        class="btn btn-close"
+        (click)="closeModal();clearAll()"
+        aria-label="Close"
+        ></button>
+      </div>
+
+      <!-- Body -->
+      <div class="modal-body">
+        <div class="container-fluid">
+          {{clipboardString}}
+        </div>
+      </div>
+      <!-- Footer -->
+      <div class="modal-footer">
+      </div>
+    </div>
   </div>
 </div>

@@ -256,7 +256,7 @@ export class ExcelCopyPasteComponent implements OnInit {
   isMandatoryColumnMissing(headings:string[]):boolean {
     const emptyHeadings = headings.filter(field=>field === '');
     if(emptyHeadings.length) {
-      this.toastr.error(`Empty column(s) found, either delete it or select column value.`,"Error");
+      this.toastr.error(`Unable to submit. please select all columns.`,"Error");
       return true;
     }
     const requiredColumn = this.options.find(option=> option.isRequired && !headings.includes(option.key));
@@ -280,25 +280,25 @@ export class ExcelCopyPasteComponent implements OnInit {
   copyData() {
     const dataObject = {
       "fields": [
-          "costingDimension",
-          "budget",
-          "actualExpenditure"
+          "Costing Dimension",
+          "Actual Expenditure",
+          "Comment"
       ],
       "data": [
           [
-              "Current Liabilities",
-              "1600882",
-              "220207615"
+              "1.1 Salaries - program management",
+              "3421725",
+              "Salaries - program management: The overall variation of USD 536,431.1  variance is mainly due to the reprogramming and adding some position which was not filled during 2022, the consultancies services that was projected for one year completed in the 1st quarter, In some areas the recruitment was delayed by WHO hence the budget is not fully utilized, withdrawal of OTCD in July-22 from the continuation of HIV-Harm reduction services and delay in timely recruitment of required staff by UNODC and nominal savings due to exchange profit."
           ],
           [
-              "Current Assets",
-              "162978686",
-              "220577.49"
+              "2.2 Technical assistance-related per diems/transport/other costs",
+              "13073",
+              "The overall negative variation of 11% is due not the implementation of Case detection and diagnosis (TB care and prevention) and the expenditure booked is related to the lunch and refreshment costs for the meetings of the national program review."
           ],
           [
-              "Loans & Advances (Asset)",
-              "2395266.02",
-              "220577.49"
+              "3.3 External audit fees",
+              "286763",
+              "This comment should span multiple lines but cannot."
           ]
       ]
     }
@@ -311,7 +311,7 @@ export class ExcelCopyPasteComponent implements OnInit {
     this.clipboardString = copyString;
     console.log("Final copied string is:\n",copyString);
     navigator.clipboard.writeText(copyString);
-    this.toastr.success("Copied the text to clipboard","Copy");
+    this.toastr.success("Data copied and ready to be pasted into Excel.","Success");
     //TODO: text formatting pending in modal, see in console it is displaying as expected
     //this.openCopyModal();
   }

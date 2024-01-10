@@ -2,15 +2,17 @@
 
   <!-- Button -->
   <div class="row">
-    <div class="col">
-      <button class="btn btn-primary" (click)="copyData()">
-        Copy data to paste into Excel
-      </button>
-    </div>
-    <div class="col text-end">
-      <button class="btn btn-primary" (click)="openCopyPasteModal()">
-        Copy-paste data from Excel for Total Expenditure
-      </button>
+    <div class="col d-flex flex-column align-items-end">
+      <div>
+        <button class="btn btn-outline-primary" (click)="copyData()">
+          Copy data to paste into Excel for Total Expenditure
+        </button>
+      </div>
+      <div class="mt-2">
+        <button class="btn btn-primary" (click)="openCopyPasteModal()">
+          Copy-paste data from Excel for Total Expenditure
+        </button>
+      </div>
     </div>
   </div>
 
@@ -175,7 +177,6 @@
 </div>
 
 <!-- Copy Modal -->
-
 <div
   class="modal fade"
   id="copyModal"
@@ -186,13 +187,14 @@
       <!-- Header -->
       <div class="modal-header">
         <h5 class="modal-title" id="fileUploadModal">
-          Copy text to paste into excel </h5>
+          Copy text to paste into excel
+        </h5>
         <button
-        type="button"
-        class="btn btn-close"
-        (click)="closeModal();clearAll()"
-        aria-label="Close"
-        ></button>
+          type="button"
+          class="btn btn-close"
+          (click)="closeModal();clearAll()"
+          aria-label="Close">
+        </button>
       </div>
 
       <!-- Body -->
@@ -201,9 +203,11 @@
           {{clipboardString}}
         </div>
       </div>
+
       <!-- Footer -->
       <div class="modal-footer">
       </div>
+
     </div>
   </div>
 </div>

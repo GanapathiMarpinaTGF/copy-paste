@@ -199,9 +199,9 @@ export class ExcelCopyPasteComponent implements OnInit {
       });
       this.toastr.success("Submitted successfully.","Success");
       console.log("==========Details==============");
-      console.log("Final save object==>",finalSaveObject);
       console.log("Api Method: ",this.modalConfiguration.apiMethod);
       console.log("Api Endpoint: ",this.modalConfiguration.apiEndpoint);
+      console.log("Payload==>",finalSaveObject);
     }
   }
 

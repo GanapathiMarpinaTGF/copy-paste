@@ -29,7 +29,7 @@
       <!-- Header -->
       <div class="modal-header">
         <h5 class="modal-title" id="fileUploadModal">
-          Copy paste data from Excel for Total Expenditure </h5>
+          {{modalConfiguration.headerText}} </h5>
         <button
         type="button"
         class="btn btn-close"
@@ -46,7 +46,7 @@
           <div class="row">
             <div class="col">
               <div class="alert alert-secondary" role="alert">
-                <span class="fw-bold">Lorem ipsum</span> dolor sit amet, consectetur adipiscing elit. Nulla eu volutpat dolor. Sed bibendum in dolor in consectetur. Quisque <span class="fw-bold">tellus erat</span>, <span class="fw-bold">porta id mauris ac</span>, commodo <span class="fw-bold">tempus elit</span>. Maecenas auctor nec elit nec scelerisque. Duis sit amet accumsan metus. Sed accumsan magna mi, non suscipit elit molestie eu. Vestibulum vestibulum odio vel vestibulum tempor.
+                {{modalConfiguration.helpText}}
               </div>
             </div>
           </div>
@@ -81,7 +81,7 @@
           <div class="mt-4" *ngIf="tableForm && form && headings.length">
 
             <!-- Delete columns -->
-            <div class="row">
+            <div class="row" *ngIf="modalConfiguration.isDeletionEnabled">
               <div
                 *ngFor="let heading of headings; let colIndex = index"
                 class="col text-center">
@@ -104,10 +104,21 @@
                 *ngFor="let heading of headings"
                 class="col"
               >
-                <app-headings [heading]="heading" [form]="form">
-                </app-headings>
+                <!-- <app-headings [heading]="heading" [form]="form">
+                </app-headings> -->
+                <form [formGroup]="form">
+                  <div class="col">
+                      <select class="form-select" style="font-weight: bold;" [id]="heading.key" [formControlName]="heading.key" 
+                      (change)="changeHeader(heading)">
+                          <option [value]="''" disabled>Select column</option>
+                          <option *ngFor="let opt of heading.options" [value]="opt.key" [disabled]="opt.disabled">
+                              {{opt.value}}
+                          </option>
+                      </select>
+                  </div>
+                </form>
               </div>
-              <div class="col-1">
+              <div class="col-1" *ngIf="modalConfiguration.isDeletionEnabled">
                 &nbsp;
               </div>
             </div>
@@ -131,7 +142,7 @@
                   </div>
 
                   <!-- Delete row -->
-                  <div class="col-1 d-flex align-items-center">
+                  <div class="col-1 d-flex align-items-center" *ngIf="modalConfiguration.isDeletionEnabled">
                     <button
                       class="btn btn-outline-danger"
                       type="button"
@@ -173,41 +184,5 @@
       </div>
     </div>
 
-  </div>
-</div>
-
-<!-- Copy Modal -->
-<div
-  class="modal fade"
-  id="copyModal"
-  tabindex="-1">
-  <div class="modal-dialog modal-dialog-scrollable modal-xl">
-    <div class="modal-content">
-
-      <!-- Header -->
-      <div class="modal-header">
-        <h5 class="modal-title" id="fileUploadModal">
-          Copy text to paste into excel
-        </h5>
-        <button
-          type="button"
-          class="btn btn-close"
-          (click)="closeModal();clearAll()"
-          aria-label="Close">
-        </button>
-      </div>
-
-      <!-- Body -->
-      <div class="modal-body">
-        <div class="container-fluid">
-          {{clipboardString}}
-        </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="modal-footer">
-      </div>
-
-    </div>
   </div>
 </div>

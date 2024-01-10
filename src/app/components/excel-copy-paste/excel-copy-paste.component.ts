@@ -1,9 +1,9 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { parse } from 'papaparse';
 import { Modal } from 'bootstrap';
-import { Option } from '../headings/headings.component';
+import { CopyPasteConfiguration, Heading, Option } from '../headings/headings.component';
 
 @Component({
   selector: 'app-excel-copy-paste',
@@ -11,55 +11,20 @@ import { Option } from '../headings/headings.component';
   styleUrls: ['./excel-copy-paste.component.css'],
 })
 export class ExcelCopyPasteComponent implements OnInit {
-  @ViewChild('inputFile')
-  inputFile!: ElementRef;
-  pasteData!: string;
+  @Input() modalConfiguration!:CopyPasteConfiguration;
+  @ViewChild('inputFile') inputFile!: ElementRef;
   tableForm: FormGroup = this.fb.group({});
   form!: FormGroup;
   copyPasteModal!: Modal;
-  copyModal!: Modal;
-  options:Option[] = [
-    {
-      key: 'costingDimension',
-      value: 'Costing Dimension',
-      isRequired: true
-    },
-    {
-      key: 'budget',
-      value: 'Budget',
-      isRequired: false,
-    },
-    {
-      key: 'actualExpenditure',
-      value: 'Actual Expenditure',
-      isRequired: true,
-    },
-    {
-      key: 'budgetVsActualVariance',
-      value: 'Budget vs Actual Variance',
-      isRequired: false,
-    },
-    {
-      key: 'absorptionRate',
-      value: 'Absorption Rate',
-      isRequired: false,
-    },
-    {
-      key: 'comment',
-      value: 'Comment',
-      isRequired: false,
-    },
-  ];
-
   headings!: {
     key: string;
-    label: string;
     value: string;
     required: boolean;
-    options: { key: string; value: string; isRequired: boolean }[];
+    options: Option[];
   }[];
-  clipboardString?: string;
+
   constructor(private readonly fb: FormBuilder, private readonly toastr: ToastrService) {}
+
   ngOnInit(): void {
     this.tableForm = this.fb.group({
       rows: this.fb.array([]),
@@ -79,22 +44,6 @@ export class ExcelCopyPasteComponent implements OnInit {
         });
       }
       this.copyPasteModal.show();
-    }
-  }
-
-  openCopyModal() {
-    const copyModal: Element | null = document.getElementById(
-      'copyModal',
-    );
-
-    if (copyModal) {
-      if (!this.copyModal) {
-        this.copyModal = new Modal(copyModal, {
-          backdrop: 'static',
-          keyboard: false,
-        });
-      }
-      this.copyModal.show();
     }
   }
 
@@ -164,7 +113,7 @@ export class ExcelCopyPasteComponent implements OnInit {
   }
 
   removeColumn(colIndex: number,controlKey:string) {
-    const colToRemove = this.options.find(option=>option.key === this.form.get(controlKey)?.value)
+    const colToRemove = this.modalConfiguration.columns.find(option=>option.key === this.form.get(controlKey)?.value)
     if(colToRemove){
       colToRemove.disabled = false;
     }
@@ -220,10 +169,9 @@ export class ExcelCopyPasteComponent implements OnInit {
     for (let tabIndex = 0; tabIndex < tabsCount; tabIndex++) {
         const dropdownObject = {
           key: `col${tabIndex}`,
-          label: '',
           value: '',
           required: false,
-          options: this.options,
+          options: this.modalConfiguration.columns,
         };
         this.headings.push(dropdownObject);
     }
@@ -249,7 +197,11 @@ export class ExcelCopyPasteComponent implements OnInit {
         vals = vals.map(val=>val?.replace(/\n/g, ''));
         finalSaveObject.data.push(vals as never);
       });
+      this.toastr.success("Submitted successfully.","Success");
+      console.log("==========Details==============");
       console.log("Final save object==>",finalSaveObject);
+      console.log("Api Method: ",this.modalConfiguration.apiMethod);
+      console.log("Api Endpoint: ",this.modalConfiguration.apiEndpoint);
     }
   }
 
@@ -259,7 +211,7 @@ export class ExcelCopyPasteComponent implements OnInit {
       this.toastr.error(`Unable to submit. please select all columns.`,"Error");
       return true;
     }
-    const requiredColumn = this.options.find(option=> option.isRequired && !headings.includes(option.key));
+    const requiredColumn = this.modalConfiguration.columns.find(option=> option.isRequired && !headings.includes(option.key));
     if(requiredColumn) {
       this.toastr.error(`Unable to submit: a required column (${requiredColumn.value}) is missing.`,"Error");
       return true;
@@ -267,12 +219,23 @@ export class ExcelCopyPasteComponent implements OnInit {
     return false;
   }
 
+  changeHeader(heading: Heading<string>) {
+    const formValues = Object.values(this.form?.value) as string[];
+    heading?.options.forEach((option:any)=>{
+      if(formValues.includes(option.key)){
+        option.disabled = true;
+      } else {
+        option.disabled = false;
+      }
+    })
+  }
+
   clearAll() {
     const formRows = this.tableForm.get('rows') as FormArray;
     formRows.clear();
     this.headings = [];
     this.form = this.fb.group({});
-    this.options.forEach(option=>option.disabled=false);
+    this.modalConfiguration.columns.forEach(option=>option.disabled=false);
     this.inputFile.nativeElement.value = "";
   }
 
@@ -298,7 +261,7 @@ export class ExcelCopyPasteComponent implements OnInit {
           [
               "3.3 External audit fees",
               "286763",
-              "This comment should span multiple lines but cannot."
+              "This comment should \nspan multiple lines \n but cannot."
           ]
       ]
     }
@@ -308,11 +271,10 @@ export class ExcelCopyPasteComponent implements OnInit {
       copyString = copyString.concat(`\n`);
       row.forEach(value=>copyString = copyString.concat(`${value}\t`))
     });
-    this.clipboardString = copyString;
     console.log("Final copied string is:\n",copyString);
+    const str = "Cell A1 with line1\vline2\tCell B1 with line1\vline2\nCell A2\tCell B2";
     navigator.clipboard.writeText(copyString);
     this.toastr.success("Data copied and ready to be pasted into Excel.","Success");
     //TODO: text formatting pending in modal, see in console it is displaying as expected
-    //this.openCopyModal();
   }
 }

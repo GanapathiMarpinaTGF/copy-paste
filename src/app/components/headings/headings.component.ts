@@ -25,9 +25,17 @@ export class HeadingsComponent {
 export interface Heading<T> {
   value: T|undefined;
   key: string;
-  label: string;
   required: boolean;
   options: Option[];
 }
 
 export interface Option {key: string, value: string, isRequired: boolean, disabled?: boolean}
+
+export interface CopyPasteConfiguration {
+  apiEndpoint: string;
+  apiMethod: string;
+  headerText: string;
+  helpText:string;
+  isDeletionEnabled:boolean;
+  columns: Option[]
+}

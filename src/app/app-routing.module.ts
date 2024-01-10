@@ -3,14 +3,14 @@ import { RouterModule, Routes } from '@angular/router';
 import { ExcelCopyPasteComponent } from './components/excel-copy-paste/excel-copy-paste.component';
 
 const routes: Routes = [
-  {
-    path: 'copypaste',
-    pathMatch: 'full',
-    component: ExcelCopyPasteComponent,
-  },
+  // {
+  //   path: 'copypaste',
+  //   pathMatch: 'full',
+  //   component: ExcelCopyPasteComponent,
+  // },
   {
     path: '**',
-    redirectTo: 'copypaste',
+    redirectTo: '',
   },
 ];
 
